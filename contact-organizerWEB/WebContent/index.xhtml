@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui"> 
+
+<h:head></h:head> 
+<body> 
+<ui:composition template="template/template.xhtml">
+<ui:define name="preHead">
+	<f:metadata>
+		<f:viewParam name="width" value="400"></f:viewParam>
+	</f:metadata>
+	<f:event listener="#{loginBean.checkIfLogIn}" type="preRenderView"/>
+</ui:define>
+<ui:define name="pageTitle">Moje kontakty</ui:define>
+<ui:define name="pageHeader">Moje kontakty</ui:define>
+<ui:define name="body">
+<h:form id="form">
+	<p:panel>
+		<f:facet name="header">
+			<h:outputText value="Kategorie" />
+		</f:facet>
+		<p:tree value="#{contactBean.categoryTreeRoot}" var="node" id="tree" selectionMode="single" selection="#{contactBean.selectedNode}">
+			<p:ajax event="select" update=":form:contacts :form:details :form:categoryAdd" listener="#{contactBean.onNodeSelect}" />  
+			<p:ajax event="unselect" update=":form:contacts :form:details :form:categoryAdd" listener="#{contactBean.onNodeDeselect}" />
+			<p:treeNode >  
+			    <h:outputText value="#{node.name}" />
+			</p:treeNode>  
+		</p:tree>
+		<f:facet name="footer">
+			<h:panelGroup id="categoryAdd">
+				<h:commandLink value="Dodaj kategorię" actionListener="#{contactBean.addCategoryPrepare}"  rendered="#{contactBean.categorySelected and empty contactBean.category}" update=":form:categoryAdd :form:tree"/>
+				<h:panelGroup  rendered="#{contactBean.categorySelected and not empty contactBean.category}">
+					<p:inputText id="newCategory" value="#{contactBean.category.name}"/>
+					<p:message for="newCategory" showSummary="true"/>	
+					<p:commandButton value="Dodaj" update=":form:tree :form:categoryAdd" actionListener="#{contactBean.addCategory}"/>
+				</h:panelGroup> 
+			</h:panelGroup>
+		</f:facet>
+	</p:panel>
+	<p:panel id="contacts">
+		<p:dataTable id="dataTable" var="contact" value="#{contactBean.allContactsModel}" 
+			rendered="#{contactBean.categorySelected}" selectionMode="single">  
+  
+  			<p:ajax event="rowSelect" listener="#{contactBean.onRowSelect}" update=":form:details"  />  
+        	<p:ajax event="rowUnselect" listener="#{tableBean.onRowUnselect}" update=":form:details"/>  
+        
+	        <p:column id="modelHeader" sortBy="#{contact.key}">  
+	            <f:facet name="header">  
+	                <h:outputText value="Imię i nazwisko" />  
+	            </f:facet>  
+	            <h:outputText value="#{contact.name} #{contact.surname}" />  
+	        </p:column>  
+	    
+	    	<f:facet name="footer">
+		   		<p:commandLink value="Nowy kontakt" actionListener="#{contactBean.newContact()}" update=":form:details" 
+		   			immediate="true" rendered="#{contactBean.categorySelected}"/>
+	    	</f:facet>
+	    </p:dataTable> 
+
+	</p:panel>	
+	<p:panel id="details">
+		<h:panelGrid columns="2" rendered="#{contactBean.newContact or contactBean.editContact or contactBean.contactSelected}">
+			
+			<p:outputLabel value="Imię" for="name"/>
+			<h:panelGroup>
+				<p:inputText id="name" value="#{contactBean.contact.name}" rendered="#{not contactBean.contactSelected}"/>
+				<h:outputText  value="#{contactBean.contact.name}" rendered="#{contactBean.contactSelected}" style="font-weight: bold"/>
+				<p:message for="name" showSummary="true"/>	
+			</h:panelGroup> 
+		
+			<p:outputLabel value="Nazwisko" for="surname"/>
+			<h:panelGroup>
+				<p:inputText id="surname" value="#{contactBean.contact.surname}"  rendered="#{not contactBean.contactSelected}"/>
+				<h:outputText value="#{contactBean.contact.surname}" rendered="#{contactBean.contactSelected}" style="font-weight: bold"/>
+				<p:message for="surname" showSummary="true"/>	
+			</h:panelGroup> 
+		
+			<p:outputLabel value="Email" for="email"/>
+			<h:panelGroup>
+				<p:inputText id="email"  value="#{contactBean.contact.email}" validatorMessage="Proszę podać prawidłowy adres e-mail." rendered="#{not contactBean.contactSelected}">
+					<f:validateRegex pattern="|[\w\.-]*[a-zA-Z0-9_]@[\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]" />
+				</p:inputText>
+				<h:outputText value="#{contactBean.contact.email}" rendered="#{contactBean.contactSelected}" style="font-weight: bold"/>
+				<p:message for="email" showSummary="true"/>	
+			</h:panelGroup>
+
+			<p:outputLabel value="Telefon" for="phone"/>
+			<h:panelGroup>
+				<p:inputText id="phone" value="#{contactBean.contact.phone}" rendered="#{not contactBean.contactSelected}"/>
+				<h:outputText value="#{contactBean.contact.phone}" rendered="#{contactBean.contactSelected}" style="font-weight: bold"/>
+				<p:message for="phone" showSummary="true"/>	
+			</h:panelGroup> 
+
+			<p:outputLabel value="Notatka" for="note"/>
+			<h:panelGroup>
+				<p:inputTextarea id="note" value="#{contactBean.contact.notes}" rendered="#{not contactBean.contactSelected}"/>
+				<h:outputText value="#{contactBean.contact.notes}" rendered="#{contactBean.contactSelected}" />
+				<p:message for="note" showSummary="true"/>	
+			</h:panelGroup> 
+				
+			<f:facet name="footer">
+				<p:commandButton value="Zapisz" actionListener="#{contactBean.save}" 
+					update=":form:contacts :form:details :globalGrowl" rendered="#{contactBean.editContact or contactBean.newContact}"/>
+				<p:commandButton value="Anuluj" actionListener="#{contactBean.cancel}" 
+					update=":form:contacts :form:details :globalGrowl" rendered="#{contactBean.editContact or contactBean.newContact}"/>
+				<p:commandButton value="Edytuj" actionListener="#{contactBean.edit}" 
+					update=":form:contacts :form:details :globalGrowl" rendered="#{contactBean.contactSelected}"/>
+			</f:facet>	 
+		</h:panelGrid>
+	</p:panel>
+</h:form>
+</ui:define>
+</ui:composition>
+</body> 
+</html>

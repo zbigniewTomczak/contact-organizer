@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:p="http://primefaces.org/ui" 
+      xmlns:hel="http://java.sun.com/jsf/composite/helper"> 
+
+<h:head></h:head> 
+<body> 
+<ui:composition template="/template/template.xhtml">
+<ui:define name="preHead">
+	<f:event listener="#{loginBean.checkIfNotLogIn}" type="preRenderView"/>
+</ui:define>
+<ui:define name="pageTitle">Rejestracja</ui:define>
+<ui:define name="pageHeader">Rejestracja</ui:define>
+<ui:define name="body">
+<h:form>
+	<h:panelGrid columns="2">
+	
+	<p:outputLabel value="Imię" for="name"/>
+	<h:panelGroup>
+		<p:inputText id="name" value="#{registerBean.user.name}" required="true"  requiredMessage="#{msg.requiredMessage}"/>
+		<p:message for="name" showSummary="true"/>	
+	</h:panelGroup> 
+
+	<p:outputLabel value="Nazwisko" for="surname"/>
+	<h:panelGroup>
+		<p:inputText id="surname" value="#{registerBean.user.surname}" required="true"  requiredMessage="#{msg.requiredMessage}"/>
+		<p:message for="surname" showSummary="true"/>	
+	</h:panelGroup> 
+
+	<p:outputLabel value="Email" for="email"/>
+	<h:panelGroup>
+		<p:inputText id="email"  value="#{registerBean.user.email}" required="true"  requiredMessage="#{msg.requiredMessage}" validatorMessage="Proszę podać prawidłowy adres e-mail." binding="#{registerBean.emailInput}" >
+			<f:validateRegex pattern="[\w\.-]*[a-zA-Z0-9_]@[\w\.-]*[a-zA-Z0-9]\.[a-zA-Z][a-zA-Z\.]*[a-zA-Z]" />
+		</p:inputText>
+		<p:message for="email" showSummary="true"/>	
+	</h:panelGroup> 
+
+	<p:outputLabel value="Hasło" for="password"/>
+	<h:panelGroup>
+		<p:password  id="password" value="#{registerBean.password}" required="true"  requiredMessage="#{msg.requiredMessage}" binding="#{registerBean.passwordInput}" redisplay="true" autocomplete="false" />
+		<p:message for="password" showSummary="true"/>	
+	</h:panelGroup> 
+
+	<p:outputLabel value="Powtórz hasło" for="password-repeat"/>
+	<h:panelGroup>
+		<p:password id="password-repeat"  value="#{registerBean.passwordRepeat}" required="true"  requiredMessage="#{msg.requiredMessage}" binding="#{registerBean.passwordRepeatInput}" redisplay="true" autocomplete="false"/>
+		<p:message for="password-repeat" showSummary="true" />	
+	</h:panelGroup> 
+
+	<f:facet name="footer">
+		<p:commandButton value="Rejestruj" action="#{registerBean.register}" ajax="false"/>
+		<br/>
+		<h:outputText value="Masz już konto?" />
+		<h:link outcome="login" value=" Zaloguj się."/>
+	</f:facet>	
+
+	</h:panelGrid>
+</h:form>
+</ui:define>
+</ui:composition>
+</body> 
+</html>
